@@ -9,24 +9,28 @@ import (
 	"strings"
 )
 
-// FastaFileToAlignment reads a FASTA file into an Alignment struct.
-func FastaFileToAlignment(path string) (sequences Alignment) {
+// FastaFileToCharAlignment reads a FASTA file into a character-based Alignment struct.
+func FastaFileToCharAlignment(path string) (sequences Alignment) {
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	return FastaToAlignment(file)
+	return FastaToAlignment(file, false)
+}
+
+// FastaFileToCodonAlignment reads a FASTA file into a codon-based Alignment struct.
+func FastaFileToCodonAlignment(path string) (sequences Alignment) {
+	file, err := os.Open(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	return FastaToAlignment(file, true)
 }
 
 // FastaToAlignment reads a FASTA-formatted io.Reader stream into an Alignment struct.
-func FastaToAlignment(file io.Reader) (sequences Alignment) {
-	// file, err := os.Open(path)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// defer file.Close()
-
+func FastaToAlignment(file io.Reader, toCodon bool) (sequences Alignment) {
 	reader := bufio.NewReader(file)
 
 	var err error
@@ -40,7 +44,13 @@ func FastaToAlignment(file io.Reader) (sequences Alignment) {
 		line = strings.TrimSuffix(line, "\n")
 		if strings.HasPrefix(line, ">") {
 			if seqBuffer.Len() > 0 {
-				sequences = append(sequences, NewCharSequence(name, desc, seqBuffer.String()))
+				var sequence Sequence
+				if toCodon == true {
+					sequence = NewCodonSequence(name, desc, seqBuffer.String())
+				} else {
+					sequence = NewCharSequence(name, desc, seqBuffer.String())
+				}
+				sequences = append(sequences, sequence)
 				seqBuffer.Reset()
 				name, desc = "", ""
 			}
@@ -65,7 +75,13 @@ func FastaToAlignment(file io.Reader) (sequences Alignment) {
 		}
 	}
 	if seqBuffer.Len() > 0 {
-		sequences = append(sequences, NewCharSequence(name, desc, seqBuffer.String()))
+		var sequence Sequence
+		if toCodon == true {
+			sequence = NewCodonSequence(name, desc, seqBuffer.String())
+		} else {
+			sequence = NewCharSequence(name, desc, seqBuffer.String())
+		}
+		sequences = append(sequences, sequence)
 		seqBuffer.Reset()
 	}
 	return
