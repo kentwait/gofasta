@@ -1,6 +1,9 @@
 package gofasta
 
+// Bases are the 4 nucleotide bases
 var Bases = [4]string{"T", "C", "A", "G"}
+
+// Codons are the 64 codons, including the 3 stop codons.
 var Codons = [64]string{
 	"TTT", "TTC", "TTA", "TTG",
 	"TCT", "TCC", "TCA", "TCG",
@@ -19,7 +22,11 @@ var Codons = [64]string{
 	"GAT", "GAC", "GAA", "GAG",
 	"GGT", "GGC", "GGA", "GGG",
 }
+
+// StopCodons are the 3 stop codons that terminate translation.
 var StopCodons = [3]string{"TGA", "TAG", "TAA"}
+
+// AminoAcids are amino acids in 1-letter encoding.
 var AminoAcids = [20]string{
 	"A",
 	"R",
@@ -42,6 +49,8 @@ var AminoAcids = [20]string{
 	"Y",
 	"V",
 }
+
+// GeneticCode is a map that translate a codon to its corresponding amino acid.
 var GeneticCode = map[string]string{
 	"TTT": "F",
 	"TTC": "F",
