@@ -99,7 +99,7 @@ func TestAlignment_ToLower(t *testing.T) {
 	}
 }
 
-func TestAlignment_Write(t *testing.T) {
+func TestAlignment_ToFasta(t *testing.T) {
 	names := []string{"test1", "test2", "test3"}
 	descs := []string{"test", "", "abc xyz"}
 	seqs := []string{"TTT---TTCTTATTG", "TTT---TTCTTTTTG", "TTTTTCTTC---TTG"}
@@ -108,18 +108,19 @@ func TestAlignment_Write(t *testing.T) {
 		NewCharSequence(names[1], descs[1], seqs[1]),
 		NewCharSequence(names[2], descs[2], seqs[2]),
 	}
-	exp := []byte(fmt.Sprintf(">%s %s\n%s", names[0], descs[0], seqs[0]) +
-		fmt.Sprintf(">%s\n%s", names[1], seqs[1]) +
-		fmt.Sprintf(">%s %s\n%s", names[2], descs[2], seqs[2]))
+	exp := fmt.Sprintf(">%s %s\n%s\n", names[0], descs[0], seqs[0]) +
+		fmt.Sprintf(">%s\n%s\n", names[1], seqs[1]) +
+		fmt.Sprintf(">%s %s\n%s\n", names[2], descs[2], seqs[2])
 
-	var actual []byte
-	a.Write(actual)
+	actual := a.ToFasta()
 
-	for i := range actual {
-		if exp[i] != actual[i] {
-			t.Errorf("Write: expected byte does not match actual: %v != %v", exp[i], actual[i])
-		}
+	if len(actual) == 0 {
+		t.Errorf("ToFasta: expected non-empty byte slice")
 	}
+	if exp != actual {
+		t.Errorf("ToFasta: expected does not match actual: %v != %v", exp, actual)
+	}
+
 }
 
 func TestAlignment_Valid_Empty(t *testing.T) {

@@ -1,6 +1,7 @@
 package gofasta
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 )
@@ -61,33 +62,32 @@ func (a Alignment) Valid() bool {
 	return true
 }
 
-// ToFasta saves the sequence alignment to a FASTA file.
-func (a Alignment) ToFasta(path string) {
+// ToFastaFile saves the sequence alignment to a FASTA file.
+func (a Alignment) ToFastaFile(path string) {
 	f, err := os.Create(path)
 	if err != nil {
 		panic(err)
 	}
 	defer f.Close()
 
-	var b []byte
-	a.Write(b)
-	f.Write(b)
+	_, err = f.WriteString(a.ToFasta())
+	if err != nil {
+		panic(err)
+	}
 	f.Sync()
 }
 
-func (a Alignment) Write(p []byte) (n int, err error) {
+// ToFasta writes the sequence alignment as a string in the FASTA format.
+func (a Alignment) ToFasta() string {
 	// Append each Sequence in Alignment
-	var blen int
+	var buff bytes.Buffer
 	for _, s := range a {
-		var bstr []byte
 		if len(s.Description()) > 0 {
-			bstr = []byte(fmt.Sprintf(">%s %s\n", s.ID(), s.Description()))
+			buff.WriteString(fmt.Sprintf(">%s %s\n", s.ID(), s.Description()))
 		} else {
-			bstr = []byte(fmt.Sprintf(">%s\n", s.ID()))
+			buff.WriteString(fmt.Sprintf(">%s\n", s.ID()))
 		}
-		bstr = []byte(fmt.Sprintf("%s\n", s.Sequence()))
-		blen += len(bstr)
-		p = append(p, bstr...)
+		buff.WriteString(fmt.Sprintf("%s\n", s.Sequence()))
 	}
-	return blen, nil
+	return buff.String()
 }
